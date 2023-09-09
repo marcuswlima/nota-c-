@@ -22,9 +22,10 @@ class Program
         Nota n=new();
         for (int i=1; i<=quatidade; i++)
         {
-            n.Randomizar();
+            n.Randomizar(1);
             Console.Write(n.ToString() + ' ');
         }
+        Console.Write('\n');   
         Console.Write('\n');   
 
     }
@@ -34,9 +35,10 @@ class Program
         Intervalo intervalo=new();
         for (int i=1; i<=quatidade; i++)
         {
-            intervalo.Randomizar();
+            intervalo.Randomizar(1);
             Console.Write(intervalo.ToString()+ ' ');
         }
+        Console.Write('\n');   
         Console.Write('\n');   
     }
     static void GerarTriades(int quatidade)
@@ -45,9 +47,10 @@ class Program
         Triade triade=new();
         for (int i=1; i<=quatidade; i++)
         {
-            triade.Randomizar();
+            triade.Randomizar(1);
             Console.Write(triade.ToString()+ ' ');
         }
+        Console.Write('\n');   
         Console.Write('\n');   
     }
 
