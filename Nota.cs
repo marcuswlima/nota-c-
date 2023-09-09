@@ -147,7 +147,7 @@ namespace NotaNamespace
             return strNota;
         }
 
-        public void Randomizar(int in_dificuldade = 1)
+        public void Randomizar(int dificuldade = 1)
         {
         	int oitava=0;
             int grau=0;
@@ -156,7 +156,7 @@ namespace NotaNamespace
                 oitava = GerarInteiro(1,7);
                 grau = GerarInteiro(1,7);
 
-                switch (in_dificuldade)
+                switch (dificuldade)
                 {
                     case 1:acidente = 0;break;
                     case 2:acidente = GerarInteiro(-1,1);break;
@@ -179,7 +179,7 @@ namespace NotaNamespace
                 random = new Random();
 
             if (maior > menor){
-                return random.Next(menor, maior);
+                return random.Next(menor, maior+1);
             }
             else
                 return 0;
@@ -195,12 +195,36 @@ namespace NotaNamespace
             return OitavaValida(Oitava) && GrauValido(Grau) && AcidenteValido(Acidente);
         }
 
-        public Nota QualRelativa(int qdtNotasDoIntervaloDesejado, int orientacao=1)
+        public void Up1SemiTom()
         {
-            // Implement your own logic here
-            return new Nota();
-        }
+            int o=Oitava, g=Grau, a=Acidente;
 
+            if (a==-1){
+                a=0;
+            }else if((a==0)){
+                if (g==3){
+                    ++g;
+                }else if (g==7){
+                    ++o;
+                    g=1;
+                }else{
+                    a=1;
+                }
+            }else if((a==1)){
+                a=0;
+                ++g;
+            }
+
+            Oitava   = o;
+            Grau     = g;
+            Acidente = a;
+        }
+        public void SetNota(int oitava, int grau, int acidente)
+        {
+            Oitava = oitava;
+            Grau = grau;
+            Acidente = acidente;
+        }
 //-----------------------------
 // Privates
 //-----------------------------
@@ -222,12 +246,6 @@ namespace NotaNamespace
             }
             return resposta;
         }
-        private void SetNota(int oitava, int grau, int acidente)
-        {
-            Oitava = oitava;
-            Grau = grau;
-            Acidente = acidente;
-        }
 
         private bool OitavaValida( int o ){
             // Sete oitavas completas em um piano [1:8]
@@ -246,11 +264,6 @@ namespace NotaNamespace
 
 //-----------------------------------
         public void SetNota(string nota)
-        {
-            // Implement your own logic here
-        }
-
-        public void Up1SemiTom()
         {
             // Implement your own logic here
         }

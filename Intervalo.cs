@@ -48,6 +48,10 @@ namespace NotaNamespace
 
         }
 
+        public override string ToString()
+        {
+            return '['+TipoIntervalo+':'+QtdNotasNaturais+':'+QtdSemiTons+']';
+        }
     }
 
     class Intervalo
@@ -116,50 +120,60 @@ namespace NotaNamespace
                 }
             }
             N1 = n;
-            setN2(tipoIntervalo,1);
+            SetN2(tipoIntervalo,1);
         }
 
+        public Intervalo(Nota n1, Nota n2){
+            N1 = n1;
+            N2 = n2;
+        }
 //-----------------------------
 // Publics
 //-----------------------------
+        public bool IntervalorValido()
+        {
+            return N1.NotaValida() && N2.NotaValida();
+        }
         public override string ToString()
         {
-            string resposta="";
-
-            resposta += N1.ToString();
-            resposta += ":";
-            resposta += N2.ToString() + " ";
-
-            return resposta;
+            return '['+N1.ToString()+':'+N2.ToString()+"]["+GetTipoIntervalo()+']';
         }
-        public void setN2(string tipoIntervalo, int orientacao = 1){
+        public void SetN2(string tipoIntervalo, int orientacao = 1){
             {//validacoes
                 string program="Intervalo.setN2(string,int)"; 
                 if (!StrEhIntervalo(tipoIntervalo))
                 {
                     throw new ArgumentException(program + " / intervalo invalido / " + tipoIntervalo);
                 }
-                if (!validarOrientacao(orientacao))
+                if (!OrientacaoValida(orientacao))
                 {
                     throw new ArgumentException(program + " / orientacao invalda / " + orientacao.ToString());
                 }
             }
             Nota n1=new(),n2=new();
 
-            tRecDadosIntervalo intervalo=getQuantidades(tipoIntervalo);
+            tRecDadosIntervalo dadosIntervalo=getQuantidades(tipoIntervalo);
             int qtdSemiTonsEntreAsDuasNotas=0, novoAcidente=0;
             
             n1 = N1;
-            n2 = QualRelativa(n1,intervalo.QtdNotasNaturais,orientacao);
+            n2 = QualRelativa(n1,dadosIntervalo.QtdNotasNaturais,orientacao);
 
             qtdSemiTonsEntreAsDuasNotas = distanciaEmSemiTons(n1,n2);
 
             if (orientacao==1){
-                novoAcidente = intervalo.QtdSemiTons - qtdSemiTonsEntreAsDuasNotas;
+                novoAcidente = dadosIntervalo.QtdSemiTons  - qtdSemiTonsEntreAsDuasNotas;
             }else{
-                novoAcidente = qtdSemiTonsEntreAsDuasNotas    - intervalo.QtdSemiTons ;
+                novoAcidente = qtdSemiTonsEntreAsDuasNotas - dadosIntervalo.QtdSemiTons ;
             }
 
+//            Console.Write(dadosIntervalo.ToString()+'\n');
+//            Console.Write(n1.ToString()+'\n');
+//            Console.Write(n2.ToString()+'\n');
+//            Console.Write("qtdSemiTonsEntreAsDuasNotas>"+qtdSemiTonsEntreAsDuasNotas+'\n');
+//            Console.Write("dadosIntervalo.QtdNotasNaturais>"+dadosIntervalo.QtdNotasNaturais+'\n');
+//            Console.Write("novoAcidente>"+novoAcidente+'\n');
+
+            novoAcidente += N1.Acidente;
             n2.Acidente = novoAcidente;
 
             N2 = n2;
@@ -168,20 +182,35 @@ namespace NotaNamespace
         
         public void Randomizar(int dificuldade = 1)
         {
-            Nota n=new(dificuldade);
+            Nota n=new(dificuldade);//randomizar a inicial
 
-            //randomizar intervalo
             tRecDadosIntervalo[] intervalos = new tRecDadosIntervalo[QTDINTERVALOS];
         	getIntervalos(intervalos);
         	int aleatorio = Nota.GerarInteiro(1,QTDINTERVALOS);
 
             this.N1 = n;
+            SetN2(intervalos[aleatorio-1].TipoIntervalo,1);
+        }
 
-            setN2(intervalos[aleatorio-1].TipoIntervalo,1);
+        public string GetTipoIntervalo()
+        {
+            string resposta="er";
+            int qtdNotasNaturais = GetQtdNotasNaturais();
+            int qtdSemiTons = GetQtdSemiTons();
+            tRecDadosIntervalo[] dadosIntervalo = new tRecDadosIntervalo[QTDINTERVALOS];
+            getIntervalos(dadosIntervalo);
+
+            for (int i=0; i<QTDINTERVALOS; i++){
+                if ((dadosIntervalo[i].QtdNotasNaturais==qtdNotasNaturais) && (dadosIntervalo[i].QtdSemiTons==qtdSemiTons)){
+                    resposta = dadosIntervalo[i].TipoIntervalo;
+                    break; 
+                }
+            }
+
+            return resposta;
         }
 
         public static void getIntervalos(tRecDadosIntervalo []arr){
-
 
             tRecDadosIntervalo[] intervalos = {
                                                 new tRecDadosIntervalo("1J",1, 1),
@@ -213,6 +242,46 @@ namespace NotaNamespace
 //-----------------------------
 // Privates
 //-----------------------------
+
+        private int GetQtdSemiTons()
+        {
+            return distanciaEmSemiTons(N1,N2);
+        }
+
+        private int GetQtdNotasNaturais()
+        {
+
+            int resposta=0,
+                g1 = N1.Grau,
+                g2 = N2.Grau
+                ;
+            
+            bool bAscendente = (N1 < N2) ,
+                bMesmaOitava = N1.Oitava == N2.Oitava
+                ;
+
+//            Console.Write("bAscendente->"+bAscendente+'\n');
+//            Console.Write("bMesmaOitava->"+bMesmaOitava+'\n');
+//            Console.Write("g1->"+g1+'\n');
+//            Console.Write("g2->"+g2+'\n');
+
+            if      ( (bAscendente) && (bMesmaOitava) ){
+                resposta = g2 - g1 + 1;
+            }else if( (bAscendente) &&!(bMesmaOitava) ){
+                if (g1==g2){
+                    resposta = 8;
+                }
+                else{
+                    resposta = (7 - g1) +  g2 +1 ;
+                }
+            }else if(!(bAscendente) && (bMesmaOitava) ){
+                resposta = g1 - g2 + 1;
+            }else if(!(bAscendente) &&!(bMesmaOitava) ){
+                resposta = (7 - g2) +  g1 + 1;
+            }
+
+            return resposta;
+        }
         private Nota QualRelativa(Nota n, int relativa, int orientacao){
             Nota resposta=new();
 
@@ -232,7 +301,6 @@ namespace NotaNamespace
                     g += 7;
                     o--;
                 }
-
             }
 
             resposta.Oitava=o;
@@ -240,13 +308,12 @@ namespace NotaNamespace
             resposta.Acidente=a;
 
             return resposta;
-
         }
         private bool StrEhIntervalo(string tipoIntervalo){
             string pattern = @"^[1-8](J|M|m|A|d)$";
             return Regex.IsMatch(tipoIntervalo,pattern);
         }
-        private bool validarOrientacao(int o )
+        private bool OrientacaoValida(int o )
         {
             return o == -1 || o == 1;
         }
@@ -310,7 +377,7 @@ namespace NotaNamespace
             resp += n2.Acidente;
             return resp;
 
-        }//distanciaEmSemitons
+        }
     }
 
 }
